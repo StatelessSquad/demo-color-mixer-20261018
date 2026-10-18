@@ -1,0 +1,17 @@
+{
+  "name": "demo-color-mixer-20261018",
+  "version": "1.0.0",
+  "description": "One-page colour mixer demo",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.5",
+    "vite": "^4.5.14",
+    "vitest": "^0.30.1"
+  }
+}
