@@ -3,14 +3,21 @@ name: github pages
 on:
   push:
     branches:
-      - main  # Set a branch to deploy
-  pull-request:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Echo
+        run: echo "Hello from pages workflow"
       - uses: actions/setup-node@v4
         with:
           node-version: 20
