@@ -1,31 +1,36 @@
-name: github pages
-
+# Known-good GitHub Pages deploy for a Vite app. Copy to .github/workflows/pages.yml unchanged.
+# Runs on main only (never on pull_request: a PR can never deploy and would show a red check).
+# Needs: Pages enabled with source "GitHub Actions" (repo-setup.sh --public-pages does it) and vite `base: '/<repo>/'`.
+name: pages
 on:
   push:
-    branches:
-      - main
-  pull_request:
+    branches: [main]
   workflow_dispatch:
-
 permissions:
   contents: read
+  pages: write
   id-token: write
-
+concurrency:
+  group: pages
+  cancel-in-progress: false
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Echo
-        run: echo "Hello from pages workflow"
       - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+        with: { node-version: 22, cache: npm }
       - run: npm ci
       - run: npm run build
+      - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./dist
-      - uses: actions/deploy-pages@v4
-        with:
-          artifact_name: github-pages
+        with: { path: ./dist }
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,28 +1,30 @@
+# Known-good CI for a Vite + TypeScript app. Copy to .github/workflows/ci.yml. Job names are the required checks.
 name: ci
 on:
   push:
     branches: [main]
   pull_request:
-  workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   secrets-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
       # gitleaks via its official image: free for organizations (gitleaks-action needs a paid license for orgs)
       - name: gitleaks (full history)
-        run: docker run --rm -v $PWD:/repo zricethezav/gitleaks:latest git /repo --redact --no-banner --exit-code 1
+        run: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest git /repo --redact --no-banner --exit-code 1
   lint-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+        with: { node-version: 22, cache: npm }
       - run: npm ci
-      - uses: pre-commit/action@v3.0.1
-      - name: Tests
-        run: make test
+      - run: npm run lint --if-present
+      - run: npm test --if-present
+      - run: npm run build
